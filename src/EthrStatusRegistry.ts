@@ -30,11 +30,16 @@ export class EthrStatusRegistry implements StatusResolver {
   static filterDocForAddresses(didDoc: DIDDocument): string[] {
     const keyEntries: string[] = didDoc.verificationMethod
       .filter(
-        (entry) => entry?.type === 'Secp256k1VerificationKey2018' && typeof entry?.ethereumAddress !== 'undefined'
+        (entry) => entry?.type === 'EcdsaSecp256k1RecoveryMethod2020' && typeof entry?.blockchainAccountId !== 'undefined'
       )
-      .map((entry) => entry?.ethereumAddress || '')
+      .map((entry) => {
+        if(entry?.blockchainAccountId) {
+          const ethAddress =  this.getEthereumAddress(entry.blockchainAccountId);
+          return ethAddress;
+        }
+        return '';
+      })
       .filter((address) => address !== '')
-
     return keyEntries
   }
 
@@ -117,6 +122,16 @@ export class EthrStatusRegistry implements StatusResolver {
       }
       return Promise.reject(e)
     }
+  }
+
+  static getEthereumAddress = (blockchainAccountId : string) => {
+    const tokens = blockchainAccountId.split('@');
+    const address = tokens[0];
+    const networkInfo = tokens[1].split(':');
+    if (networkInfo[0] === 'eip155'){
+      return address;
+    }
+    else return '';
   }
 
   private parseRevokers(credential: string, didDoc: DIDDocument, issuer: string): string[] {
