@@ -28,7 +28,7 @@ export const methodName = 'EthrStatusRegistry2019'
 export class EthrStatusRegistry implements StatusResolver {
   // look for ethereumAddress entries in didDoc
   static filterDocForAddresses(didDoc: DIDDocument): string[] {
-    const keyEntries: string[] = didDoc.publicKey
+    const keyEntries: string[] = didDoc.verificationMethod
       .filter(
         (entry) => entry?.type === 'Secp256k1VerificationKey2018' && typeof entry?.ethereumAddress !== 'undefined'
       )
